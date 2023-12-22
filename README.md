@@ -20,13 +20,13 @@ Welcome to the backend repository of the User Authentication and Profile Managem
 The backend of the User Authentication and Profile Management System is built using Express, a web application framework for Node.js. It incorporates MySQL as the database for storing user information securely. The system supports user registration, login, logout, and profile management functionalities, ensuring a seamless and secure experience for users.
 
 ### Technology Stack
-Express: Web application framework for Node.js.
-MySQL: Open-source relational database management system.
-Cors: Middleware for handling Cross-Origin Resource Sharing.
-Express-session: Middleware for managing user sessions.
-Cookie-parser: Middleware for parsing cookies.
-Body-parser: Middleware for parsing request bodies.
-Jsonwebtoken: Library for creating and verifying JSON Web Tokens.
+#### Express: Web application framework for Node.js.
+#### MySQL: Open-source relational database management system.
+#### Cors: Middleware for handling Cross-Origin Resource Sharing.
+#### Express-session: Middleware for managing user sessions.
+#### Cookie-parser: Middleware for parsing cookies.
+#### Body-parser: Middleware for parsing request bodies.
+#### Jsonwebtoken: Library for creating and verifying JSON Web Tokens.
 
 ### Getting Started
 Clone the repository:
