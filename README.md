@@ -69,4 +69,4 @@ The server will be accessible at http://localhost:8081.
 Contributions are welcome! If you have ideas for enhancements or find any issues, feel free to open an issue or submit a pull request.
 
 ### License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE(https://github.com/botim/backend/blob/master/LICENSE) file for details.
