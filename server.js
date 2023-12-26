@@ -57,7 +57,6 @@ const verifyUser = (req,res,next) => {
     }
 }
 
-
 db.connect(function(err) {
     if(err){
         console.log(err);
@@ -81,6 +80,7 @@ app.post('/signup', (req,res) => {
             req.body.email,
             req.body.password
         ];
+        console.log(values);
         const sqlnew = "INSERT INTO userprofile (`name`, `email`, `user_id`) VALUES (?,?,?)";
         const Duplicate = 'SELECT * FROM users WHERE email = ?';
         db.query(Duplicate, [values.email], (duplicateErr, duplicateData) => {
@@ -139,7 +139,7 @@ app.post('/login', (req,res) => {
                 return res.json({Status:"Success"})
             }
             else{
-                console.log(res.json)   ;
+                console.log(res.json);
                 return res.json("Fail");
             }
         }
@@ -152,8 +152,7 @@ app.get('/logout', (req,res) => {
 })
 
 app.post('/userprofile', verifyUser, (req,res) => {
-
-    const sql = "UPDATE userprofile SET name = ?, email = ?,age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ?  WHERE user_id = ?";
+    const sql = "UPDATE userprofile SET name = ?, email = ? , age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ? WHERE user_id = ?";
     const values =[
         req.body.name,
         req.body.email,
