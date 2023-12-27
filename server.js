@@ -57,6 +57,7 @@ const verifyUser = (req,res,next) => {
     }
 }
 
+
 db.connect(function(err) {
     if(err){
         console.log(err);
@@ -113,7 +114,7 @@ app.post('/signup', (req,res) => {
                         }
                     })
                     return res.json(data);
-                });
+                })
             }
         })
 })
