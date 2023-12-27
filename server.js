@@ -89,7 +89,7 @@ app.post('/signup', (req,res) => {
                 console.log(res.json);
                 return res.json("Error");
             }
-            if(duplicateData && duplicateData.length > 0) {
+            else if(duplicateData && duplicateData.length > 0) {
                 return res.status("Account already created");
             }
             else {
@@ -100,7 +100,7 @@ app.post('/signup', (req,res) => {
                     }
                     console.log(data);
                     const value_new = [
-                        req.body.name,
+                        req.body.name,  
                         req.body.email,
                         data.insertId
                     ];
