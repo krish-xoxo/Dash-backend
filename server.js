@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
 
+
 const app = express();  
 
 app.use(cors({
@@ -17,7 +18,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 
 app.use(session({
     secret: "secret",
@@ -65,6 +66,11 @@ db.connect(function(err) {
     else{
         console.log("COnnected");
     }
+})
+
+
+app.get('/',verifyUser, (req,res) => {
+    return res.json({Status: "Success", name: req.name,email: req.email})
 })
 
 //TO VALIDATE USING WEBTOKENS
@@ -191,7 +197,7 @@ app.post('/userprofile', verifyUser, (req,res) => {
                 })
             }
         })
-});
+}); 
 
 app.listen(8081, () =>{
     console.log("Listening");
