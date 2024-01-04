@@ -69,7 +69,7 @@ db.connect(function (err) {
 
 //TO VALIDATE USING WEBTOKENS
 app.get('/', verifyUser, (req, res) => {
-    return res.json({ Status: "Success", name: req.name, email: req.email })
+    return res.json({ Status: "Success", name: req.name, email: req.email})
 })
 
 //TO ENTER NORMAL PASSWORD(WITHOUT HASHED)[VALIDATED]:
@@ -99,7 +99,7 @@ app.post('/signup', (req, res) => {
                     console.log(err);
                     return res.json("Error");
                 }
-                console.log(data);
+                //console.log(data);
                 const value_new = [
                     req.body.name,
                     req.body.email,
@@ -122,8 +122,11 @@ app.post('/signup', (req, res) => {
 //TO LOGIN USING NORMAL PASSWORD: 
 app.post('/login', (req, res) => {
     const email_patt = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const sql = "SELECT * FROM users WHERE `email` = ? && `password`=?";
+    const sql = 'SELECT * FROM users WHERE `email` = ? && `password`=?';
     const values = [req.body.email];
+    //console.log(values)
+    //const password = "SELECT * FROM users WHERE password =?"; 
+    //console.log(password)
     db.query(sql, [req.body.email, req.body.password], (err, data) => {
         if (!email_patt.test(values.email)) {
             if (err) {
@@ -131,18 +134,19 @@ app.post('/login', (req, res) => {
                 return res.json("Error");
             }
             else if (data.length > 0) {
+                console.log(req.body.password);
                 const name = data[0].name;
                 const email = data[0].email;
                 const id = data[0].id;
-                const token = jwt.sign({ name, email, id }, "mera-jsonwebtoken-private-key", { expiresIn: '1d' });
+                const token = jwt.sign({ name, email, id}, "mera-jsonwebtoken-private-key", { expiresIn: '1d' });
                 res.cookie('token', token);
-                //console.log(data);
+                console.log(data);
                 return res.json({ Status: "Success" })
             }
-            else {
-                console.log(res.json);
-                return res.json("Fail");
-            }
+        }
+        else {
+            console.log(res.json);
+            return res.json("Fail");
         }
     })
 })
@@ -192,6 +196,33 @@ app.post('/userprofile', verifyUser, (req, res) => {
         }
     })
 });
+
+app.post('/userprofile', verifyUser, (req,res) => {
+    const sql = "SELECT * FROM userprofile WHERE user_id = ?";
+    const values = [
+        req.body.name,
+        req.body.email,
+        req.body.age,
+        req.body.gender,
+        req.body.mobilenumber,
+        req.body.address,
+        req.body.pincode,
+        req.body.city,
+        req.body.state,
+        req.body.country,
+        req.id,
+    ];
+    db.query(sql, values, (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.json("Error");
+        }
+        else{
+            console.log(data);
+            return res.json({Status: "Update Succesfull",data});
+        }
+    })
+})
 
 app.listen(8081, () => {
     console.log("Listening");
