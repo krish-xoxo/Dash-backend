@@ -5,9 +5,10 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
-
+// import test from "./test";
 
 const app = express();
+// const [errors, setErrors] = useState({})
 
 app.use(cors({
     origin: ["http://localhost:3000"],
@@ -37,7 +38,6 @@ const db = mysql.createConnection({
     password: "root123",
     database: "logindb"
 })
-
 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
@@ -69,7 +69,7 @@ db.connect(function (err) {
 
 //TO VALIDATE USING WEBTOKENS
 app.get('/', verifyUser, (req, res) => {
-    return res.json({ Status: "Success", name: req.name, email: req.email})
+    return res.json({ Status: "Success", name: req.name, email: req.email })
 })
 
 //TO ENTER NORMAL PASSWORD(WITHOUT HASHED)[VALIDATED]:
@@ -81,7 +81,7 @@ app.post('/signup', (req, res) => {
         req.body.email,
         req.body.password
     ];
-    console.log(values);
+    //console.log(values);
     const sqlnew = "INSERT INTO userprofile (`name`, `email`, `user_id`) VALUES (?,?,?)";
     const Duplicate = 'SELECT * FROM users WHERE email = ?';
     db.query(Duplicate, [values.email], (duplicateErr, duplicateData) => {
@@ -97,7 +97,7 @@ app.post('/signup', (req, res) => {
             db.query(sql, values, (err, data) => {
                 if (err) {
                     console.log(err);
-                    return res.json("Error");
+                    return res.json("Error - Email already exists");
                 }
                 //console.log(data);
                 const value_new = [
@@ -110,7 +110,7 @@ app.post('/signup', (req, res) => {
                         console.log(e);
                     }
                     else {
-                        console.log(data);
+                        //console.log(data);
                     }
                 })
                 return res.json(data);
@@ -124,9 +124,6 @@ app.post('/login', (req, res) => {
     const email_patt = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const sql = 'SELECT * FROM users WHERE `email` = ? && `password`=?';
     const values = [req.body.email];
-    //console.log(values)
-    //const password = "SELECT * FROM users WHERE password =?"; 
-    //console.log(password)
     db.query(sql, [req.body.email, req.body.password], (err, data) => {
         if (!email_patt.test(values.email)) {
             if (err) {
@@ -134,15 +131,16 @@ app.post('/login', (req, res) => {
                 return res.json("Error");
             }
             else if (data.length > 0) {
-                console.log(req.body.password);
+                //console.log(req.body.password);
                 const name = data[0].name;
                 const email = data[0].email;
                 const id = data[0].id;
-                const token = jwt.sign({ name, email, id}, "mera-jsonwebtoken-private-key", { expiresIn: '1d' });
+                const token = jwt.sign({ name, email, id }, "mera-jsonwebtoken-private-key", { expiresIn: '1d' });
                 res.cookie('token', token);
-                console.log(data);
+                //console.log(data);
                 return res.json({ Status: "Success" })
             }
+            return res.json({ Status: "Error - No record found" })
         }
         else {
             console.log(res.json);
@@ -157,69 +155,65 @@ app.get('/logout', (req, res) => {
 })
 
 app.post('/userprofile', verifyUser, (req, res) => {
-    const sql = "UPDATE userprofile SET name = ?, email = ? , age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ? WHERE user_id = ?";
+    // const err = test(values);
+    // setErrors(err);
+    // if (err.mobilenumber === "" && err.pincode === "" && err.city === "" && err.state === "" && err.country === "") {
+        const sql = "UPDATE userprofile SET name = ?, email = ? , age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ? WHERE user_id = ?";
+        const values = [
+            req.body.name,
+            req.body.email,
+            req.body.age,
+            req.body.gender,
+            req.body.mobilenumber,
+            req.body.address,
+            req.body.pincode,
+            req.body.city,
+            req.body.state,
+            req.body.country,
+            req.id,
+        ];
+        console.log(values);
+        db.query(sql, values, (err, data) => {
+            if (err) {
+                console.log(err);
+                return res.json("Error - Check the age field and try again. The age field cannot be a string.");
+            }
+            else {
+                const sql_new = "UPDATE users SET name = ?, email = ? WHERE id=?";
+                const value_new = [
+                    req.body.name,
+                    req.body.email,
+                    req.id,
+                ];
+                db.query(sql_new, value_new, (e, data) => {
+                    if (e) {
+                        console.log(e);
+                        return res.json("Failed - The email and password field cannot be empty.");
+                    }
+                    else {
+                        //console.log(data);
+                        return res.json(data);
+                    }
+                })
+            }
+        })
+    // }
+});
+
+
+app.get('/userdetails', verifyUser, (req, res) => {
+    const sql = "SELECT * FROM userprofile WHERE user_id = ?";
     const values = [
-        req.body.name,
-        req.body.email,
-        req.body.age,
-        req.body.gender,
-        req.body.mobilenumber,
-        req.body.address,
-        req.body.pincode,
-        req.body.city,
-        req.body.state,
-        req.body.country,
         req.id,
     ];
-    console.log(values);
     db.query(sql, values, (err, data) => {
         if (err) {
             console.log(err);
             return res.json("Error");
         }
         else {
-            const sql_new = "UPDATE users SET name = ?, email = ? WHERE id=?";
-            const value_new = [
-                req.body.name,
-                req.body.email,
-                req.id,
-            ];
-            db.query(sql_new, value_new, (e, data) => {
-                if (e) {
-                    console.log(e);
-                }
-                else {
-                    //console.log(data);
-                    return res.json(data);
-                }
-            })
-        }
-    })
-});
-
-app.post('/userprofile', verifyUser, (req,res) => {
-    const sql = "SELECT * FROM userprofile WHERE user_id = ?";
-    const values = [
-        req.body.name,
-        req.body.email,
-        req.body.age,
-        req.body.gender,
-        req.body.mobilenumber,
-        req.body.address,
-        req.body.pincode,
-        req.body.city,
-        req.body.state,
-        req.body.country,
-        req.id,
-    ];
-    db.query(sql, values, (err, data) => {
-        if (err) {
-            console.log(err);
-            return res.json("Error");
-        }
-        else{
-            console.log(data);
-            return res.json({Status: "Update Succesfull",data});
+            //console.log(data);
+            return res.json({ Status: "Update True", data: data[0] });
         }
     })
 })
