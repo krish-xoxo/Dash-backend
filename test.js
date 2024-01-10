@@ -17,7 +17,14 @@ function test() {
     const numPattern = /^\d{1,13}$/;
     const pinPattern = /^\d{1,6}$/;
     const namePattern = /^[A-Za-z\s]+$/;
+    const email_patt = /^[a-zA-Z0-9]+@[^\s@]+\.[^\s@]+$/;
 
+    if(!email_patt.test(values.email)){
+        error.email = "Oops sorry !! Email did not match the required pattern";
+    }
+    else{
+        error.email = "";
+    }
     if (!numPattern.test(data.mobilenumber)){
         error.mobilenumber = "Please check the mobile number field. The field cannot be a string";
     }
