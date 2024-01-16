@@ -5,7 +5,8 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
-// import test from "./test";
+import multer from 'multer';
+import path from "path";
 
 const app = express();
 
@@ -20,6 +21,34 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+const storage = multer.diskStorage({
+    destination: (req, file, db) => {
+        db(null, 'public/images')
+    },
+    filename: (req, file, db) => {
+        db(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({
+    storage: storage
+})
+
+app.post('/upload', upload.single('image') ,(req,res) => {
+    // console.log(req.file);
+    const image = req.file.filename;
+    const sql = "UPDATE userprofile SET image = ?";
+    db.query(sql, [image], (err,result) => {
+        if(err){
+            return res.json({Message: "Error in image uploading"});
+        }
+        else{
+            return res.json({Status: "Success"});
+        }
+    })
+})
+
+//TO CREATE THE SESSION 
 app.use(session({
     secret: "secret",
     resave: false,
@@ -31,6 +60,7 @@ app.use(session({
 }))
 //const salt = 10;
 
+//TO CONNECT THE DATABSE
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -38,6 +68,7 @@ const db = mysql.createConnection({
     database: "logindb"
 })
 
+//FUNCTION TO VERIFY THE USER AND PASS NAME,EMAIL AND ID 
 const verifyUser = (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
@@ -57,6 +88,7 @@ const verifyUser = (req, res, next) => {
     }
 }
 
+//DATABASE CONNECTION
 db.connect(function (err) {
     if (err) {
         console.log(err);
@@ -155,42 +187,47 @@ app.post('/login', (req, res) => {
     })
 })
 
+//TO MAINTAIN LOGOUT SESSIONS
 app.get('/logout', (req, res) => {
     res.clearCookie('token');
     return res.json({ Status: "Success" })
 })
 
-app.post('/userprofile', verifyUser, (req, res) => {
-    // const err = test(values);
-    // setErrors(err);
-    // if (err.mobilenumber === "" && err.pincode === "" && err.city === "" && err.state === "" && err.country === "") {
-    const sql = "UPDATE userprofile SET name = ?, email = ? , age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ? WHERE user_id = ?";
+//TO SEND DATA FROM FORM TO TABLE 
+app.post('/userprofile',verifyUser, upload.single('image') ,(req, res) => {
+    // console.log(req.file)
+    const data = JSON.parse(req.body.values);
+    const sql = "UPDATE userprofile SET name = ?, email = ? , age = ?, gender = ?, mobilenumber = ?, address = ?, pincode = ?, city = ?, state = ?, country = ?, image =? WHERE user_id = ?";
     const values = [
-        req.body.name,
-        req.body.email,
-        req.body.age,
-        req.body.gender,
-        req.body.mobilenumber,
-        req.body.address,
-        req.body.pincode,
-        req.body.city,
-        req.body.state,
-        req.body.country,
-        req.id,
+        data.name,
+        data.email,
+        data.age,
+        data.gender,
+        data.mobilenumber,
+        data.address,
+        data.pincode,
+        data.city,
+        data.state,
+        data.country,
+        req.file && req.file.filename ? req.file.filename : "", 
+        req.id
     ];
-    console.log(values);
+    // console.log(data.name);
+    // console.log(req.body);
     db.query(sql, values, (err, data) => {
         if (err) {
             console.log(err);
             return res.json("Error - Check the age field and try again. The age field cannot be a string.");
         }
         else {
+            const data = JSON.parse(req.body.values);
             const sql_new = "UPDATE users SET name = ?, email = ? WHERE id=?";
             const value_new = [
-                req.body.name,
-                req.body.email,
+                data.name,
+                data.email,  
                 req.id,
             ];
+            // console.log(value_new);
             db.query(sql_new, value_new, (e, data) => {
                 if (e) {
                     console.log(e);
@@ -206,7 +243,7 @@ app.post('/userprofile', verifyUser, (req, res) => {
     // }
 });
 
-
+//TO UPDATE USER'S DETAILS IN THE FORM
 app.get('/userdetails', verifyUser, (req, res) => {
     const sql = "SELECT * FROM userprofile WHERE user_id = ?";
     const values = [
@@ -218,12 +255,13 @@ app.get('/userdetails', verifyUser, (req, res) => {
             return res.json("Error");
         }
         else {
-            console.log(data);
+            // console.log(data);
             return res.json({ Status: "Update True", data: data[0] });
         }
     })
 })
 
+//TO CONNECT TO BACKEND SERVER
 app.listen(8081, () => {
     console.log("Listening");
 })
