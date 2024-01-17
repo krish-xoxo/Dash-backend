@@ -20,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(express.static('public'))
 
 const storage = multer.diskStorage({
     destination: (req, file, db) => {
@@ -34,6 +35,7 @@ const upload = multer({
     storage: storage
 })
 
+//TO UPLOAD PROFILE PICTURE
 app.post('/upload', upload.single('image') ,(req,res) => {
     // console.log(req.file);
     const image = req.file.filename;
